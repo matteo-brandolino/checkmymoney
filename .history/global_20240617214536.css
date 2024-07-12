@@ -1,0 +1,23 @@
+@layer base {
+  :root {
+    --destructive: 2 53% 64%;
+    --destructive-foreground: 2 53% 4%;
+    --success: 145 53% 64%;
+    --success-foreground: 145 53% 4%;
+    --warning: 48 53% 64%;
+    --warning-foreground: 48 53% 4%;
+    --info: 205 53% 64%;
+    --info-foreground: 205 53% 4%;
+  }
+
+  .dark {
+    --destructive: 12 53% 25%;
+    --destructive-foreground: 12 53% 85%;
+    --success: 90 53% 25%;
+    --success-foreground: 0 0% 100%;
+    --warning: 27 53% 25%;
+    --warning-foreground: 27 53% 85%;
+    --info: 204 53% 25%;
+    --info-foreground: 204 53% 85%;
+  }
+}
