@@ -16,6 +16,7 @@ import migrations from "../drizzle/migrations";
 import { db } from "../db/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { THEME } from "@/constants/Colors";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 let {
   primary,
@@ -131,15 +132,28 @@ function RootLayoutNav() {
   return (
     <ThemeProvider value={isDarkColorScheme ? DARK_THEME : LIGHT_THEME}>
       <QueryClientProvider client={queryClient}>
-        <Stack>
-          <Stack.Screen
-            name="(tabs)"
-            options={{
-              headerShown: false,
-            }}
-          />
-          <Stack.Screen name="modal" options={{ presentation: "modal" }} />
-        </Stack>
+        <SafeAreaProvider>
+          <Stack>
+            <Stack.Screen
+              name="(tabs)"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="newTemplate"
+              options={{
+                headerShown: false,
+              }}
+            />
+            <Stack.Screen
+              name="importFile"
+              options={{
+                headerShown: false,
+              }}
+            />
+          </Stack>
+        </SafeAreaProvider>
       </QueryClientProvider>
     </ThemeProvider>
   );

@@ -1,5 +1,6 @@
 import { QueryFunction } from "@tanstack/react-query";
 import { ReactNode } from "react";
+import { Data as DataSchema } from "@/db/schema";
 
 export type Data = {
   id: number;
@@ -31,6 +32,14 @@ export type FinancialSummary = {
   income: SummaryDetail;
   expense: SummaryDetail;
 };
+export type DataList = {
+  id: number;
+  isExpense: boolean;
+  data: DataSchema[] | null;
+  month: string | null;
+  amount: number | null;
+};
+
 export type AddTransactionCardType<T> = {
   title?: string;
   description?: string;
@@ -65,3 +74,10 @@ export type AppTheme = {
     ring: string;
   };
 };
+
+export type ExcelData = { [key: string]: string | number }[];
+
+export type DataToSave = {
+  key: string;
+  value: string;
+}[];

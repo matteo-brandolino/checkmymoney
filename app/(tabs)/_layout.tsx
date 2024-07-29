@@ -1,10 +1,8 @@
-import React from "react";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import { Tabs } from "expo-router";
-
-import { useColorScheme } from "@/components/useColorScheme";
-import { THEME } from "@/constants/Colors";
 import { View } from "react-native";
+import { Tabs } from "expo-router";
+import { THEME } from "@/constants/Colors";
+import { useColorScheme } from "@/components/useColorScheme";
+
 import {
   DoorOpenIcon,
   CirclePlus,
@@ -12,14 +10,6 @@ import {
   PackageOpenIcon,
   PackageIcon,
 } from "@/components/Icons";
-
-// You can explore the built-in icon families and icons on the web at https://icons.expo.fyi/
-function TabBarIcon(props: {
-  name: React.ComponentProps<typeof FontAwesome>["name"];
-  color: string;
-}) {
-  return <FontAwesome size={32} {...props} />;
-}
 
 export default function TabLayout() {
   const { colorScheme } = useColorScheme();
@@ -41,6 +31,7 @@ export default function TabLayout() {
         name="index"
         options={{
           title: "HOME",
+          headerShown: false,
           tabBarIcon: ({ color, focused }) => {
             return focused ? (
               <DoorOpenIcon color={color} size={26} />
@@ -57,6 +48,7 @@ export default function TabLayout() {
             return null;
           },
           title: "ADD",
+          headerShown: false,
           tabBarItemStyle: {
             marginBottom: 30,
           },
@@ -70,10 +62,10 @@ export default function TabLayout() {
         }}
       />
       <Tabs.Screen
-        name="new"
+        name="settings"
         options={{
-          title: "TEMPLATE",
-          headerTitle: "Create a new Template",
+          title: "SETTINGS",
+          headerShown: false,
           tabBarIcon: ({ color, focused }) => {
             return focused ? (
               <PackageOpenIcon color={color} size={26} />

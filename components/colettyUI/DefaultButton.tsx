@@ -1,29 +1,20 @@
-import { View, Button as Btn } from "react-native";
+import { View, PressableProps } from "react-native";
 import { Button } from "@/components/ui/button";
 import React from "react";
 import { Check } from "lucide-react-native";
 import { P } from "../ui/typography";
 
-type ButtonProps = {
-  className: string;
+interface ButtonProps extends PressableProps {
   title: string;
-  props?: Btn["props"];
-  saveKeys: () =>
-    | Promise<void>
-    | Promise<{ amount: number; isExpense: boolean } | undefined>;
-};
+  icon?: JSX.Element;
+}
 
-export default function DefaultButton({
-  className,
-  title,
-  saveKeys,
-  ...props
-}: ButtonProps) {
+export default function DefaultButton({ title, icon, ...props }: ButtonProps) {
   return (
-    <Button onPress={saveKeys} className={className} {...props}>
-      <View className="flex-row justify-center items-center w-full">
+    <Button {...props}>
+      <View className="flex-row justify-center items-center">
         <P className="color-background mr-1">{title}</P>
-        <Check className="text-background" size={24} />
+        {icon ? icon : <Check className="text-background" size={24} />}
       </View>
     </Button>
   );

@@ -1,17 +1,21 @@
 import { View } from "react-native";
 import React from "react";
-import { Card, CardContent } from "@/components/ui/card";
 import { useCustomQuery } from "@/hooks/useCustomQuery";
 import { entry } from "@/db/schema";
-import { eq, sum } from "drizzle-orm";
+import { sum } from "drizzle-orm";
 import { db } from "@/db/client";
-import { FinancialSummary } from "@/types";
-import { H3, P } from "@/components/ui/typography";
+import { DataList, FinancialSummary } from "@/types";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Summary from "@/components/colettyUI/tabs/index/Summary";
+import TransactionsList from "@/components/colettyUI/tabs/index/TransactionsList";
 
-export const STATS_QUERY_KEY = "stats";
+export const SUMMARY_QUERY_KEY = "recap";
+export const DATA_LIST_QUERY_KEY = "dataList";
 
 export default function Home() {
-  const getStats = async (): Promise<FinancialSummary | null> => {
+  const insets = useSafeAreaInsets();
+
+  const getSummary = async (): Promise<FinancialSummary | null> => {
     try {
       const dbResult = await db
         .select({
@@ -21,8 +25,7 @@ export default function Home() {
         .from(entry)
         .groupBy(entry.isExpense);
 
-      console.info("dbResult: ", dbResult);
-      console.info("dbResult2: ", await db.select().from(entry));
+      console.info("FinancialSummary dbResult: ", dbResult);
 
       const financialSummary = {
         total: {
@@ -51,42 +54,40 @@ export default function Home() {
       }
       return financialSummary;
     } catch (error) {
-      console.error("getKeysFromDb: ", error);
+      console.error("getSummary: ", error);
       return null;
     }
   };
-  const { data } = useCustomQuery({
-    queryKey: [STATS_QUERY_KEY],
-    queryFn: getStats,
+
+  const getDataList = async (): Promise<DataList[] | null> => {
+    try {
+      const dbResult = await db.select().from(entry);
+
+      console.info("Data list dbResult: ", dbResult);
+
+      if (dbResult && dbResult.length > 0) {
+        return dbResult;
+      }
+      return null;
+    } catch (error) {
+      console.error("getDataList: ", error);
+      return null;
+    }
+  };
+  const { data: summary } = useCustomQuery({
+    queryKey: [SUMMARY_QUERY_KEY],
+    queryFn: getSummary,
   });
-  console.info(data);
+
+  const { data: dataList } = useCustomQuery({
+    queryKey: [DATA_LIST_QUERY_KEY],
+    queryFn: getDataList,
+  });
 
   return (
-    <View className="flex-row flex-wrap justify-around">
-      {data && (
-        <View className="basis-[95%]">
-          <Card className="border bg-secondary">
-            <CardContent className="py-0">
-              <View className="flex-row justify-between">
-                <View className="border-r-2 border-background justify-center flex-auto my-4">
-                  <H3 className="color-background">{data.total.title}</H3>
-                  <P className="color-background">{data.total.sum} €</P>
-                </View>
-                <View className="justify-center items-center flex-auto my-6">
-                  <View>
-                    <H3 className="color-background">{data.income.title}</H3>
-                    <P className="color-background">{data.income.sum} €</P>
-                  </View>
-                  <View>
-                    <H3 className="color-background">{data.expense.title}</H3>
-                    <P className="color-background">{data.expense.sum} €</P>
-                  </View>
-                </View>
-              </View>
-            </CardContent>
-          </Card>
-        </View>
-      )}
+    <View style={{ paddingTop: insets.top * 2 }}>
+      <Summary summary={summary} />
+      <TransactionsList dataList={dataList} />
     </View>
   );
 }

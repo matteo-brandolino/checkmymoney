@@ -6,6 +6,11 @@ import {
   PackageOpenIcon,
   LucideIcon,
   Check,
+  ArrowDownIcon,
+  ArrowUpIcon,
+  ArrowRightIcon,
+  SheetIcon,
+  XIcon,
 } from "lucide-react-native";
 import { cssInterop } from "nativewind";
 
@@ -27,6 +32,11 @@ interopIcon(DoorOpenIcon);
 interopIcon(DoorClosedIcon);
 interopIcon(PackageIcon);
 interopIcon(PackageOpenIcon);
+interopIcon(ArrowDownIcon);
+interopIcon(ArrowUpIcon);
+interopIcon(ArrowRightIcon);
+interopIcon(SheetIcon);
+interopIcon(XIcon);
 
 export {
   CirclePlus,
@@ -35,4 +45,9 @@ export {
   DoorClosedIcon,
   PackageIcon,
   PackageOpenIcon,
+  ArrowDownIcon,
+  ArrowUpIcon,
+  ArrowRightIcon,
+  SheetIcon,
+  XIcon,
 };

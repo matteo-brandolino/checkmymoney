@@ -1,23 +1,39 @@
+import { Fragment, useEffect, useState } from "react";
+import { View } from "react-native";
+import InputSpinner from "react-native-input-spinner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import AddTransactionCard from "@/components/colettyUI/tabs/add/AddTransactionCard";
+import { useCustomQuery } from "@/hooks/useCustomQuery";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
 import { entry, template } from "@/db/schema";
-import { eq } from "drizzle-orm";
-import { Fragment, useEffect, useState } from "react";
-import AddTransactionCard from "@/components/colettyUI/AddTransactionCard";
-import { useCustomQuery } from "@/hooks/useCustomQuery";
 import { Entry } from "@/types";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { STATS_QUERY_KEY } from ".";
+import { DATA_LIST_QUERY_KEY, SUMMARY_QUERY_KEY } from ".";
+import { useColorScheme } from "@/components/useColorScheme";
+import { THEME } from "@/constants/Colors";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const QUERY_KEY = "keys-entry";
 
 export default function Add() {
+  const insets = useSafeAreaInsets();
+
+  const { colorScheme } = useColorScheme();
+
   const initialEntries: Entry[] = [
     {
-      id: new Date().getTime(),
+      id: new Date().getMilliseconds(),
       key: "Amount",
       value: "",
+    },
+  ];
+  const initialMonth: Entry[] = [
+    {
+      id: new Date().getMilliseconds(),
+      key: "Month",
+      value: new Date().toLocaleString("default", { month: "long" }),
     },
   ];
   const [localState, setLocalState] = useState(initialEntries);
@@ -49,7 +65,7 @@ export default function Add() {
         key: r,
         value: "",
       }));
-      return [...result, ...initialEntries];
+      return [...result, ...initialMonth, ...initialEntries];
     } catch (error) {
       console.error("getKeysFromDb: ", error);
       return null;
@@ -67,20 +83,27 @@ export default function Add() {
     console.log("Saving: ", dataToSave);
     if (dataToSave) {
       try {
+        //todo refactor
         const amountObj = dataToSave.filter((d) => d.key === "Amount")[0];
         if (!amountObj) throw new Error("Amount Obj doesn't exist");
 
-        const { value } = amountObj;
-        //todo check if is number
-        const amount = parseInt(value);
+        const monthObj = dataToSave.filter((d) => d.key === "Month")[0];
+        if (!monthObj) throw new Error("Month Obj doesn't exist");
+
+        const { value: amountValue } = amountObj;
+        const { value: month } = amountObj;
+        const amount = parseInt(amountValue);
         const isExpense = amount < 0;
         await db.insert(entry).values({
           data: dataToSave,
           isExpense,
           amount: amount,
-          month: new Date().toLocaleString("default", { month: "long" }),
+          month: month,
         });
-        const resetKeys = localState.map((k) => ({ ...k, value: "" }));
+
+        const resetKeys = localState.map((k) =>
+          k.key === "Month" ? k : { ...k, value: "" }
+        );
 
         setLocalState(resetKeys);
         return { amount, isExpense };
@@ -99,9 +122,13 @@ export default function Add() {
     onSuccess: async (data) => {
       console.log(`New Stats ${data}`);
 
-      // Update the stats in the query cache
+      // Update the summary and data list in the query cache
       await queryClient.invalidateQueries({
-        queryKey: [STATS_QUERY_KEY],
+        queryKey: [SUMMARY_QUERY_KEY],
+      });
+
+      await queryClient.invalidateQueries({
+        queryKey: [DATA_LIST_QUERY_KEY],
       });
     },
   });
@@ -123,29 +150,42 @@ export default function Add() {
   };
 
   return (
-    <AddTransactionCard
-      title="Add Transaction"
-      queryKey={QUERY_KEY}
-      initialKeys={initialEntries}
-      getKeysFromDb={getKeysFromDb}
-      saveKeys={() => mutation.mutateAsync()}
-    >
-      {localState &&
-        localState.map((d: Entry) => (
-          <Fragment key={d.id}>
-            <Label nativeID="inputLabel">{d.key}</Label>
-            <Input
-              keyboardType={
-                d.key === "Amount" ? "numbers-and-punctuation" : "default"
-              }
-              placeholder="Write some stuff..."
-              value={d.value}
-              onChangeText={(value) => onChangeEntries(value, d.id)}
-              aria-labelledbyledBy="inputLabel"
-              aria-errormessage="inputError"
-            />
-          </Fragment>
-        ))}
-    </AddTransactionCard>
+    <View className="flex-1" style={{ paddingTop: insets.top * 2 }}>
+      <AddTransactionCard
+        title="Add Transaction"
+        queryKey={QUERY_KEY}
+        initialKeys={initialEntries}
+        getKeysFromDb={getKeysFromDb}
+        saveKeys={() => mutation.mutateAsync()}
+      >
+        {localState &&
+          localState.map((d: Entry, idx) => (
+            <Fragment key={idx}>
+              <Label className="my-2" nativeID="inputLabel">
+                {d.key}
+              </Label>
+              {d.key === "Amount" ? (
+                <View className="mt-2">
+                  <InputSpinner
+                    type="float"
+                    min={-999999}
+                    color={THEME[colorScheme].primary}
+                    value={d.value}
+                    onChange={(value) => onChangeEntries(value as string, d.id)}
+                  />
+                </View>
+              ) : (
+                <Input
+                  placeholder="Write some stuff..."
+                  value={d.value}
+                  onChangeText={(value) => onChangeEntries(value, d.id)}
+                  aria-labelledbyledBy="inputLabel"
+                  aria-errormessage="inputError"
+                />
+              )}
+            </Fragment>
+          ))}
+      </AddTransactionCard>
+    </View>
   );
 }

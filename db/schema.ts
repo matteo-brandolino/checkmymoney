@@ -6,7 +6,7 @@ export const template = sqliteTable("template", {
   status: integer("status", { mode: "boolean" }).notNull().default(false),
 });
 
-type Data = {
+export type Data = {
   key: string;
   value: string;
 };
