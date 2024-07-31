@@ -92,7 +92,7 @@ export default function NewTemplate() {
     setLocalState(newKeys);
   };
 
-  const saveKeys = async () => {
+  const saveTemplate = async () => {
     const dataToSave = localState.map((d) => d.value).join(",");
     console.info("Saving: ", dataToSave);
     if (dataToSave) {
@@ -105,7 +105,7 @@ export default function NewTemplate() {
           await tx.insert(template).values({ data: dataToSave, status: true });
         });
       } catch (error) {
-        console.info("saveKeys: ", error);
+        console.info("saveTemplate: ", error);
       } finally {
         console.info("Saved");
         router.replace("/add");
@@ -161,29 +161,24 @@ export default function NewTemplate() {
         </View>
         <View className="my-8">
           <View className="my-2">
-            <DefaultInput
-              editable={false}
-              placeholder="Write some stuff..."
-              value={"Month"}
-              aria-labelledbyledBy="inputLabel"
-              aria-errormessage="inputError"
-            />
-            <View className="my-2">
-              <DefaultInput
-                editable={false}
-                placeholder="Write some stuff..."
-                value={"Amount"}
-                aria-labelledbyledBy="inputLabel"
-                aria-errormessage="inputError"
-              />
-            </View>
+            {["Month", "Category", "Amount"].map((field) => (
+              <View className="my-2" key={field}>
+                <DefaultInput
+                  editable={false}
+                  placeholder="Write some stuff..."
+                  value={field}
+                  aria-labelledbyledBy="inputLabel"
+                  aria-errormessage="inputError"
+                />
+              </View>
+            ))}
           </View>
         </View>
       </ScrollView>
       <DefaultButton
         className="sticky bottom-7"
         title="Create a template"
-        onPress={saveKeys}
+        onPress={saveTemplate}
       />
     </View>
   );

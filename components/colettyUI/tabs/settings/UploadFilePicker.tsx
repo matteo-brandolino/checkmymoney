@@ -45,7 +45,7 @@ export default function UploadFileButton({
         const sheet = workbook.Sheets[sheetName];
 
         const jsonSheet = XLSX.utils.sheet_to_json(sheet);
-
+        //todo intersect template (ai or without) and excel json
         setExcelData(jsonSheet as ExcelData);
       }
     } catch (error) {

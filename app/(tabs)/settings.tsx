@@ -17,7 +17,7 @@ export default function Settings() {
       value: "newTemplate",
     },
     {
-      label: "Import a excel",
+      label: "Import a file",
       value: "importFile",
     },
   ];

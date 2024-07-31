@@ -1,8 +1,8 @@
-import Carousel from "@/components/colettyUI/tabs/add/Carousel";
-import UploadFileButton from "@/components/colettyUI/tabs/add/UploadFilePicker";
+import Carousel from "@/components/colettyUI/tabs/settings/Carousel";
 import { ExcelData } from "@/types";
 import { Stack } from "expo-router";
 import { useState } from "react";
+import UploadMenu from "./UploadMenu";
 
 export default function ImportFile() {
   const [excelData, setExcelData] = useState<ExcelData | null>(null);
@@ -17,7 +17,7 @@ export default function ImportFile() {
       {excelData ? (
         <Carousel excelData={excelData} setExcelData={setExcelData} />
       ) : (
-        <UploadFileButton setExcelData={setExcelData} />
+        <UploadMenu setExcelData={setExcelData} />
       )}
     </>
   );

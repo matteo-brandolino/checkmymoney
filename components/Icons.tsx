@@ -11,6 +11,7 @@ import {
   ArrowRightIcon,
   SheetIcon,
   XIcon,
+  BrainIcon,
 } from "lucide-react-native";
 import { cssInterop } from "nativewind";
 
@@ -37,6 +38,7 @@ interopIcon(ArrowUpIcon);
 interopIcon(ArrowRightIcon);
 interopIcon(SheetIcon);
 interopIcon(XIcon);
+interopIcon(BrainIcon);
 
 export {
   CirclePlus,
@@ -50,4 +52,5 @@ export {
   ArrowRightIcon,
   SheetIcon,
   XIcon,
+  BrainIcon,
 };
