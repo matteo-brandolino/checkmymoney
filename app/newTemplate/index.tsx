@@ -1,71 +1,86 @@
-import { CirclePlus } from "@/components/Icons";
 import { db } from "@/db/client";
 import { template } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { useCustomQuery } from "@/hooks/useCustomQuery";
-import { Data } from "@/types";
-import DefaultInput from "@/components/colettyUI/DefaultInput";
-import { ScrollView, View } from "react-native";
+import { Data, TemplateLocalState } from "@/types";
+import { View } from "react-native";
 import { useColorScheme } from "@/components/useColorScheme";
 
 import { THEME } from "@/constants/Colors";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { H4, P } from "@/components/ui/typography";
 import { Stack, router } from "expo-router";
 import DefaultButton from "@/components/colettyUI/DefaultButton";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import AdditionalFields from "./AdditionalFields";
+import Fields from "./Fields";
 
 const QUERY_KEY = "keys-template";
 
 export default function NewTemplate() {
   const insets = useSafeAreaInsets();
 
-  const scrollViewRef = useRef<ScrollView>(null);
   const { colorScheme } = useColorScheme();
 
-  const initialKeys: Data[] = [
-    {
-      id: new Date().getTime(),
-      value: "",
-    },
-  ];
-  const [localState, setLocalState] = useState(initialKeys);
+  const initialTemplate: TemplateLocalState = {
+    amountColumnName: "amount",
+    categoriesList: ["food"],
+    data: [
+      {
+        id: new Date().getTime(),
+        value: "",
+      },
+    ],
+  };
+  const [localState, setLocalState] = useState(initialTemplate);
 
-  const getKeysFromDb = async (): Promise<Data[]> => {
+  const getTemplate = async (): Promise<TemplateLocalState> => {
     try {
       const dbResult = await db
-        .select({ data: template.data, id: template.id })
+        .select()
         .from(template)
         .where(eq(template.status, true));
 
       console.info("dbResult: ", dbResult);
-      if (!dbResult || !dbResult[0] || !dbResult[0].data) {
-        return initialKeys;
+      if (
+        !dbResult ||
+        !dbResult[0] ||
+        !dbResult[0].data ||
+        !dbResult[0].amountColumnName ||
+        !dbResult[0].categoriesList
+      ) {
+        return initialTemplate;
       }
-      const splittedDbResult = dbResult[0].data?.split(",");
-      if (!splittedDbResult) return initialKeys;
+      const splittedData = dbResult[0].data?.split(",");
+      const splittedCategories = dbResult[0].categoriesList?.split(",");
+      if (!splittedData || !splittedCategories) return initialTemplate;
       console.info(
-        "splittedDbResult: ",
-        splittedDbResult.map((r, i) => ({
+        "splittedData: ",
+        splittedData.map((r, i) => ({
           id: new Date().getTime() * (i + 1),
           value: r,
         }))
       );
 
-      return splittedDbResult.map((r, i) => ({
+      const data = splittedData.map((r, i) => ({
         id: new Date().getTime() * (i + 1),
         value: r,
       }));
+      return {
+        amountColumnName: dbResult[0].amountColumnName,
+        categoriesList: splittedCategories,
+        data,
+      };
     } catch (error) {
-      console.error("getKeysFromDb: ", error);
-      return initialKeys;
+      console.error("getTemplate: ", error);
+      return initialTemplate;
     }
   };
 
   const { data } = useCustomQuery({
     queryKey: [QUERY_KEY],
-    queryFn: getKeysFromDb,
-    initialKeys,
+    queryFn: getTemplate,
+    initialKeys: initialTemplate,
   });
 
   if (!data) return null;
@@ -76,24 +91,9 @@ export default function NewTemplate() {
     }
   }, [data]);
 
-  const onAddNewKey = async () => {
-    const newKeys = [...localState, { id: new Date().getTime(), value: "" }];
-    console.info(newKeys);
-    setLocalState(newKeys);
-  };
-
-  const onChangeKeys = async (value: string, id: number) => {
-    console.info("Try to change key with: ", value, id, localState);
-
-    const newKeys = localState.map((k) => (k.id === id ? { id, value } : k));
-
-    console.info("onChangeKeyes: ", newKeys);
-
-    setLocalState(newKeys);
-  };
-
   const saveTemplate = async () => {
-    const dataToSave = localState.map((d) => d.value).join(",");
+    const dataToSave = localState.data.map((d) => d.value).join(",");
+    const categoriesList = localState.categoriesList.join(",");
     console.info("Saving: ", dataToSave);
     if (dataToSave) {
       try {
@@ -102,7 +102,12 @@ export default function NewTemplate() {
             .update(template)
             .set({ status: false })
             .where(eq(template.status, true));
-          await tx.insert(template).values({ data: dataToSave, status: true });
+          await tx.insert(template).values({
+            data: dataToSave,
+            amountColumnName: localState.amountColumnName,
+            categoriesList,
+            status: true,
+          });
         });
       } catch (error) {
         console.info("saveTemplate: ", error);
@@ -112,11 +117,7 @@ export default function NewTemplate() {
       }
     }
   };
-  function scrollViewSizeChanged(height: number) {
-    // y since we want to scroll vertically, use x and the width-value if you want to scroll horizontally
-    scrollViewRef &&
-      scrollViewRef.current?.scrollTo({ y: height, animated: true });
-  }
+
   //TODO component if colorscheme not existing
   if (!colorScheme) return null;
 
@@ -134,49 +135,18 @@ export default function NewTemplate() {
         <H4 className="text-center">Create your budget tracker template</H4>
         <P className="text-center">Lorem ipsum dolor sit amet.</P>
       </View>
-      <ScrollView
-        ref={scrollViewRef}
-        onContentSizeChange={(_, height) => {
-          scrollViewSizeChanged(height);
-        }}
-      >
-        {localState &&
-          localState.map((k) => (
-            <View className="my-2" key={k.id}>
-              <DefaultInput
-                placeholder="Write some stuff..."
-                value={k.value}
-                onChangeText={(value) => onChangeKeys(value, k.id)}
-                aria-labelledbyledBy="inputLabel"
-                aria-errormessage="inputError"
-              />
-            </View>
-          ))}
-        <View className="my-2 flex flex-row justify-end">
-          <CirclePlus
-            onPress={onAddNewKey}
-            color={THEME[colorScheme].primary}
-            size={32}
-          />
-        </View>
-        <View className="my-8">
-          <View className="my-2">
-            {["Month", "Category", "Amount"].map((field) => (
-              <View className="my-2" key={field}>
-                <DefaultInput
-                  editable={false}
-                  placeholder="Write some stuff..."
-                  value={field}
-                  aria-labelledbyledBy="inputLabel"
-                  aria-errormessage="inputError"
-                />
-              </View>
-            ))}
-          </View>
-        </View>
-      </ScrollView>
+      <Fields
+        setLocalState={setLocalState}
+        color={THEME[colorScheme].primary}
+        localState={localState}
+      />
+      <AdditionalFields
+        color={THEME[colorScheme].primary}
+        localState={localState}
+        setLocalState={setLocalState}
+      />
       <DefaultButton
-        className="sticky bottom-7"
+        className="w-3/4 mx-auto sticky bottom-7"
         title="Create a template"
         onPress={saveTemplate}
       />

@@ -2,6 +2,8 @@ import { sqliteTable, integer, text } from "drizzle-orm/sqlite-core";
 
 export const template = sqliteTable("template", {
   id: integer("id").primaryKey(),
+  amountColumnName: text("amountColumnName").$type<string>(),
+  categoriesList: text("categoryList").$type<string>(),
   data: text("data").$type<string>(),
   status: integer("status", { mode: "boolean" }).notNull().default(false),
 });

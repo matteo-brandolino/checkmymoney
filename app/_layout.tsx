@@ -17,6 +17,7 @@ import { db } from "../db/client";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { THEME } from "@/constants/Colors";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { PortalHost } from "@rn-primitives/portal";
 
 let {
   primary,
@@ -153,6 +154,7 @@ function RootLayoutNav() {
               }}
             />
           </Stack>
+          <PortalHost />
         </SafeAreaProvider>
       </QueryClientProvider>
     </ThemeProvider>

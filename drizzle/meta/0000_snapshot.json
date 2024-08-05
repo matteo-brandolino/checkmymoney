@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "d59c5e64-5627-4a91-98ba-0cdd7540e944",
+  "id": "fa745142-c092-4173-af61-819e6425ce52",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "entry": {
@@ -57,6 +57,20 @@
           "type": "integer",
           "primaryKey": true,
           "notNull": true,
+          "autoincrement": false
+        },
+        "amountColumnName": {
+          "name": "amountColumnName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "categoryList": {
+          "name": "categoryList",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "data": {

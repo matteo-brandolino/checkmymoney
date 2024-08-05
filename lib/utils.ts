@@ -1,8 +1,9 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { db } from "@/db/client";
-import { entry } from "@/db/schema";
-import { DataToSave } from "@/types";
+import { entry, template } from "@/db/schema";
+import { DataToSave, TemplateLocalState } from "@/types";
+import { eq } from "drizzle-orm";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -66,5 +67,59 @@ export async function saveEntry({
     } finally {
       console.log("Done");
     }
+  }
+}
+
+const initialTemplate: TemplateLocalState = {
+  amountColumnName: "Amount",
+  categoriesList: [],
+  data: [
+    {
+      id: new Date().getTime(),
+      value: "",
+    },
+  ],
+};
+
+export async function getTemplate(): Promise<TemplateLocalState> {
+  try {
+    const dbResult = await db
+      .select()
+      .from(template)
+      .where(eq(template.status, true));
+
+    console.info("dbResult: ", dbResult);
+    if (
+      !dbResult ||
+      !dbResult[0] ||
+      !dbResult[0].data ||
+      !dbResult[0].amountColumnName ||
+      !dbResult[0].categoriesList
+    ) {
+      return initialTemplate;
+    }
+    const splittedData = dbResult[0].data?.split(",");
+    const splittedCategories = dbResult[0].categoriesList?.split(",");
+    if (!splittedData || !splittedCategories) return initialTemplate;
+    console.info(
+      "splittedData: ",
+      splittedData.map((r, i) => ({
+        id: new Date().getTime() * (i + 1),
+        value: r,
+      }))
+    );
+
+    const data = splittedData.map((r, i) => ({
+      id: new Date().getTime() * (i + 1),
+      value: r,
+    }));
+    return {
+      amountColumnName: dbResult[0].amountColumnName,
+      categoriesList: splittedCategories,
+      data,
+    };
+  } catch (error) {
+    console.error("getTemplate: ", error);
+    return initialTemplate;
   }
 }

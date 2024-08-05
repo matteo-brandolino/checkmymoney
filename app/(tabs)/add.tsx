@@ -6,109 +6,82 @@ import { Label } from "@/components/ui/label";
 import AddTransactionCard from "@/components/colettyUI/tabs/add/AddTransactionCard";
 import { useCustomQuery } from "@/hooks/useCustomQuery";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { entry, template } from "@/db/schema";
-import { Entry } from "@/types";
+import { entry } from "@/db/schema";
 import { DATA_LIST_QUERY_KEY, SUMMARY_QUERY_KEY } from ".";
 import { useColorScheme } from "@/components/useColorScheme";
 import { THEME } from "@/constants/Colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { getTemplate } from "@/lib/utils";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+} from "@/components/ui/select";
 
 const QUERY_KEY = "keys-entry";
 
 export default function Add() {
   const insets = useSafeAreaInsets();
 
+  const contentInsets = {
+    top: insets.top,
+    bottom: insets.bottom,
+    left: 12,
+    right: 12,
+  };
   const { colorScheme } = useColorScheme();
 
-  const initialEntries: Entry[] = [
-    {
-      id: new Date().getMilliseconds(),
-      key: "Amount",
-      value: "",
-    },
-  ];
-  const initialMonth: Entry[] = [
-    {
-      id: new Date().getMilliseconds(),
-      key: "Month",
-      value: new Date().toLocaleString("default", { month: "long" }),
-    },
-  ];
-  const [localState, setLocalState] = useState(initialEntries);
-
-  const getKeysFromDb = async (): Promise<Entry[] | null> => {
-    try {
-      const dbResult = await db
-        .select({ data: template.data, id: template.id })
-        .from(template)
-        .where(eq(template.status, true));
-
-      console.log("dbResult page two: ", dbResult);
-      if (!dbResult || !dbResult[0] || !dbResult[0].data) {
-        return null;
-      }
-      const splittedDbResult = dbResult[0].data?.split(",");
-      if (!splittedDbResult) return null;
-      console.log(
-        "splittedDbResult: ",
-        splittedDbResult.map((r, i) => ({
-          id: new Date().getTime() * (i + 1),
-          key: r,
-          value: "",
-        }))
-      );
-
-      const result = splittedDbResult.map((r, i) => ({
-        id: new Date().getTime() * (i + 1),
-        key: r,
-        value: "",
-      }));
-      return [...result, ...initialMonth, ...initialEntries];
-    } catch (error) {
-      console.error("getKeysFromDb: ", error);
-      return null;
-    }
-  };
+  const [additionalFields, setAdditionalFields] = useState<
+    { label: string; value: string; id: number }[] | null
+  >(null);
+  const [categoriesList, setCategoriesList] = useState<string[] | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("");
+  const [month, setMonth] = useState<string | null>(null);
+  const [amount, setAmount] = useState<{ label: string; value: number } | null>(
+    null
+  );
 
   const { data } = useCustomQuery({
     queryKey: [QUERY_KEY],
-    queryFn: getKeysFromDb,
-    initialKeys: initialEntries,
+    queryFn: getTemplate,
   });
+  const onChangeAdditionalFields = (id: number, value: string) => {
+    if (additionalFields) {
+      let newAdditionalFields = [...additionalFields];
+      newAdditionalFields = newAdditionalFields.map((ad) =>
+        ad.id === id ? { ...ad, value } : ad
+      );
+      setAdditionalFields(newAdditionalFields);
+    }
+  };
 
-  const saveKeys = async () => {
-    const dataToSave = localState.map((d) => ({ key: d.key, value: d.value }));
+  const saveTransaction = async () => {
+    const dataToSave =
+      additionalFields &&
+      additionalFields.map((ad) => ({ key: ad.label, value: ad.value }));
     console.log("Saving: ", dataToSave);
-    if (dataToSave) {
+    if (dataToSave && amount) {
       try {
-        //todo refactor
-        const amountObj = dataToSave.filter((d) => d.key === "Amount")[0];
-        if (!amountObj) throw new Error("Amount Obj doesn't exist");
-
-        const monthObj = dataToSave.filter((d) => d.key === "Month")[0];
-        if (!monthObj) throw new Error("Month Obj doesn't exist");
-
-        const { value: amountValue } = amountObj;
-        const { value: month } = amountObj;
-        const amount = parseInt(amountValue);
-        const isExpense = amount < 0;
+        const isExpense = amount?.value < 0;
         await db.insert(entry).values({
           data: dataToSave,
           isExpense,
-          amount: amount,
+          amount: amount.value,
           month: month,
         });
 
-        const resetKeys = localState.map((k) =>
-          k.key === "Month" ? k : { ...k, value: "" }
+        setAdditionalFields(
+          additionalFields.map((ad) => ({ ...ad, value: "" }))
         );
-
-        setLocalState(resetKeys);
+        setAmount({ ...amount, value: 0 });
+        setSelectedCategory("");
         return { amount, isExpense };
       } catch (error) {
-        console.log("Error saveKeys: ", error);
+        console.log("Error saveTransaction: ", error);
       } finally {
         console.log("Done");
       }
@@ -118,7 +91,7 @@ export default function Add() {
   const queryClient = useQueryClient();
 
   const mutation = useMutation({
-    mutationFn: saveKeys,
+    mutationFn: saveTransaction,
     onSuccess: async (data) => {
       console.log(`New Stats ${data}`);
 
@@ -135,56 +108,112 @@ export default function Add() {
 
   useEffect(() => {
     if (data) {
-      setLocalState(data);
+      setAdditionalFields(
+        data.data.map((d) => ({ ...d, label: d.value, value: "" }))
+      );
+      setCategoriesList(data.categoriesList);
+      setMonth(new Date().toLocaleString("default", { month: "long" }));
+      setAmount({
+        label: data.amountColumnName,
+        value: 0,
+      });
     }
   }, [data]);
-
-  const onChangeEntries = (value: string, id: number) => {
-    console.log("Try to change key with: ", value, id, localState);
-
-    const newKeys = localState.map((k) => (k.id === id ? { ...k, value } : k));
-
-    console.log("onChangeKeyes: ", newKeys);
-
-    setLocalState(newKeys);
-  };
 
   return (
     <View className="flex-1" style={{ paddingTop: insets.top * 2 }}>
       <AddTransactionCard
         title="Add Transaction"
-        queryKey={QUERY_KEY}
-        initialKeys={initialEntries}
-        getKeysFromDb={getKeysFromDb}
-        saveKeys={() => mutation.mutateAsync()}
+        saveTransaction={() => mutation.mutateAsync()}
       >
-        {localState &&
-          localState.map((d: Entry, idx) => (
+        {additionalFields &&
+          additionalFields.map((ad, idx) => (
             <Fragment key={idx}>
               <Label className="my-2" nativeID="inputLabel">
-                {d.key}
+                {ad.label}
               </Label>
-              {d.key === "Amount" ? (
-                <View className="mt-2">
-                  <InputSpinner
-                    type="float"
-                    min={-999999}
-                    color={THEME[colorScheme].primary}
-                    value={d.value}
-                    onChange={(value) => onChangeEntries(value as string, d.id)}
-                  />
-                </View>
-              ) : (
-                <Input
-                  placeholder="Write some stuff..."
-                  value={d.value}
-                  onChangeText={(value) => onChangeEntries(value, d.id)}
-                  aria-labelledbyledBy="inputLabel"
-                  aria-errormessage="inputError"
-                />
-              )}
+              <Input
+                placeholder="Write some stuff..."
+                value={ad.value}
+                onChangeText={(value) => onChangeAdditionalFields(ad.id, value)}
+                aria-labelledbyledBy="inputLabel"
+                aria-errormessage="inputError"
+              />
             </Fragment>
           ))}
+
+        {categoriesList && (
+          <Fragment>
+            <Label className="my-2" nativeID="inputLabel">
+              Category
+            </Label>
+            <Select
+              onValueChange={(option) =>
+                setSelectedCategory(option ? option.value : "")
+              }
+              value={{
+                label: selectedCategory
+                  ? `${selectedCategory[0].toUpperCase()}${selectedCategory.substring(
+                      1
+                    )}`
+                  : "Select a category",
+                value: selectedCategory,
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue
+                  className="text-sm native:text-lg"
+                  placeholder="Select a category"
+                />
+              </SelectTrigger>
+              <SelectContent insets={contentInsets} className="mt-1">
+                <SelectGroup>
+                  {categoriesList.map((c, index) => (
+                    <SelectItem
+                      key={index}
+                      label={`${c[0].toUpperCase()}${c.substring(1)}`}
+                      value={c}
+                    >
+                      {c}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
+          </Fragment>
+        )}
+        {month && (
+          <Fragment>
+            <Label className="my-2" nativeID="inputLabel">
+              Month
+            </Label>
+            <Input
+              placeholder="Write some stuff..."
+              value={month}
+              onChangeText={(value) => setMonth(value)}
+              aria-labelledbyledBy="inputLabel"
+              aria-errormessage="inputError"
+            />
+          </Fragment>
+        )}
+        {amount && (
+          <Fragment>
+            <View className="mt-2">
+              <Label className="my-2" nativeID="inputLabel">
+                {amount.label}
+              </Label>
+              <InputSpinner
+                type="float"
+                min={-999999}
+                color={THEME[colorScheme].primary}
+                value={amount.value}
+                onChange={(value) =>
+                  setAmount({ label: amount.label, value: value as number })
+                }
+              />
+            </View>
+          </Fragment>
+        )}
       </AddTransactionCard>
     </View>
   );

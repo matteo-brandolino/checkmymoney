@@ -9,7 +9,7 @@ export type Data = {
 export type Entry = {
   id: number;
   key: string;
-  value: string;
+  value: string | string[] | Data[];
 };
 export type QueryFn =
   | (() => Promise<Data[]>)
@@ -44,10 +44,16 @@ export type AddTransactionCardType<T> = {
   title?: string;
   description?: string;
   children: ReactNode;
-  initialKeys?: Data[];
-  queryKey: string;
-  getKeysFromDb: QueryFunction<T, string[]>;
-  saveKeys: () => Promise<{ amount: number; isExpense: boolean } | undefined>;
+  saveTransaction: () => Promise<
+    | {
+        amount: {
+          label: string;
+          value: number;
+        };
+        isExpense: boolean;
+      }
+    | undefined
+  >;
 };
 
 export type AppTheme = {
@@ -81,3 +87,9 @@ export type DataToSave = {
   key: string;
   value: string;
 }[];
+
+export type TemplateLocalState = {
+  amountColumnName: string;
+  categoriesList: string[];
+  data: Data[];
+};
