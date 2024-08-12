@@ -1,4 +1,4 @@
-import { Text, SafeAreaView } from "react-native";
+import { SafeAreaView } from "react-native";
 import {
   CardHeader,
   CardTitle,
@@ -7,7 +7,6 @@ import {
   Card,
 } from "../../../ui/card";
 import { AddTransactionCardType, Entry } from "@/types";
-import { useCustomQuery } from "@/hooks/useCustomQuery";
 import DefaultButton from "../../DefaultButton";
 import { HandCoinsIcon } from "@/components/Icons";
 

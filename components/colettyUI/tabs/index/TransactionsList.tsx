@@ -10,7 +10,7 @@ export default function TransactionsList({
   dataList: DataList[] | null | undefined;
 }) {
   return (
-    <View className="h-full mx-auto w-[95%]">
+    <View className="flex-1 mx-auto w-[95%]">
       {dataList && (
         <FlashList
           data={dataList}

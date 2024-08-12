@@ -17,25 +17,27 @@ export default function Fields({
   color,
 }: FieldsProps) {
   const [tempCategory, setTempCategory] = useState("");
-  console.log(localState);
 
   const addCategory = () => {
-    setLocalState({
-      ...localState,
-      categoriesList: [...localState.categoriesList, tempCategory],
-    });
-    setTempCategory("");
+    if (tempCategory !== "") {
+      setLocalState({
+        ...localState,
+        categoriesList: [...localState.categoriesList, tempCategory],
+      });
+      setTempCategory("");
+    }
   };
   const removeCategory = (index: number) => {
-    console.log(localState.categoriesList.splice(index, 1));
-
     setLocalState({
       ...localState,
-      categoriesList: localState.categoriesList.splice(index, 1),
+      categoriesList: localState.categoriesList
+        .filter((c) => c !== "")
+        .filter((_, i) => i !== index),
     });
   };
+
   return (
-    <View>
+    <View className="flex-1">
       <View className="mb-7">
         <Label nativeID="amount" className="pb-3.5">
           Amount Column Name
@@ -49,15 +51,21 @@ export default function Fields({
           aria-labelledbyledBy="inputLabel"
           aria-errormessage="inputError"
         />
-        <Text
-          nativeID="amount"
-          className="text-sm text-muted-foreground pt-3.5"
-        >
-          Column that contains the transaction amount
-        </Text>
       </View>
       <View className="mb-7">
-        <View className="flex-row justify-between items-end">
+        <Label nativeID="categoriesList" className="pb-3.5">
+          Category Column Name
+        </Label>
+        <DefaultInput
+          onChangeText={(value) =>
+            setLocalState({ ...localState, categoryColumnName: value })
+          }
+          placeholder="Write some stuff..."
+          value={localState.categoryColumnName}
+          aria-labelledbyledBy="inputLabel"
+          aria-errormessage="inputError"
+        />
+        <View className="mt-6 flex-row justify-between items-end">
           <View className="basis-3/4">
             <Label nativeID="categoriesList" className="pb-3.5">
               Categories List
@@ -73,14 +81,30 @@ export default function Fields({
           <CirclePlus onPress={addCategory} color={color} size={32} />
         </View>
         <View className="flex-row mt-2">
-          {localState.categoriesList?.map((c, index) => (
-            <Badge key={index} className="mr-2">
-              <TouchableOpacity onPress={() => removeCategory(index)}>
-                <Text>{c}</Text>
-              </TouchableOpacity>
-            </Badge>
-          ))}
+          {localState.categoriesList
+            ?.filter((c) => c !== "")
+            .map((c, index) => (
+              <Badge key={index} className="mr-2">
+                <TouchableOpacity onPress={() => removeCategory(index)}>
+                  <Text className="text-background">{c}</Text>
+                </TouchableOpacity>
+              </Badge>
+            ))}
         </View>
+      </View>
+      <View>
+        <Label nativeID="categoriesList" className="pb-3.5">
+          Date Column Name
+        </Label>
+        <DefaultInput
+          onChangeText={(value) =>
+            setLocalState({ ...localState, monthColumnName: value })
+          }
+          placeholder="Write some stuff..."
+          value={localState.monthColumnName}
+          aria-labelledbyledBy="inputLabel"
+          aria-errormessage="inputError"
+        />
       </View>
     </View>
   );

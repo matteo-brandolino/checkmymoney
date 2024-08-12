@@ -11,12 +11,18 @@ dependencies:
   '@react-native-async-storage/async-storage':
     specifier: 1.23.1
     version: 1.23.1(react-native@0.74.3)
+  '@react-native-community/datetimepicker':
+    specifier: 8.0.1
+    version: 8.0.1(react-native@0.74.3)(react@18.2.0)
   '@react-navigation/native':
     specifier: ^6.0.2
     version: 6.1.17(react-native@0.74.3)(react@18.2.0)
   '@rn-primitives/accordion':
     specifier: ^1.0.3
     version: 1.0.3(@types/react@18.2.79)(react-dom@18.2.0)(react-native-web@0.19.12)(react-native@0.74.3)(react@18.2.0)
+  '@rn-primitives/portal':
+    specifier: ^1.0.3
+    version: 1.0.3(@types/react@18.2.79)(react-native-web@0.19.12)(react-native@0.74.3)(react@18.2.0)
   '@rn-primitives/select':
     specifier: ^1.0.4
     version: 1.0.4(@rn-primitives/portal@1.0.3)(@types/react@18.2.79)(react-dom@18.2.0)(react-native-web@0.19.12)(react-native@0.74.3)(react@18.2.0)
@@ -104,9 +110,12 @@ dependencies:
   react-native:
     specifier: 0.74.3
     version: 0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7)(@types/react@18.2.79)(react@18.2.0)
-  react-native-input-spinner:
-    specifier: ^1.8.1
-    version: 1.8.1(@types/react-native@0.73.0)(@types/react@18.2.79)(react-native@0.74.3)(react@18.2.0)
+  react-native-animated-pagination-dots:
+    specifier: ^0.1.73
+    version: 0.1.73(react-native-svg@15.2.0)(react-native@0.74.3)(react@18.2.0)
+  react-native-date-picker:
+    specifier: ^5.0.4
+    version: 5.0.4(react-native@0.74.3)(react@18.2.0)
   react-native-pager-view:
     specifier: 6.3.0
     version: 6.3.0(react-native@0.74.3)(react@18.2.0)
@@ -3686,6 +3695,21 @@ packages:
       - utf-8-validate
     dev: false
 
+  /@react-native-community/datetimepicker@8.0.1(react-native@0.74.3)(react@18.2.0):
+    resolution: {integrity: sha512-4BO0t3geMNNw9cIIm9p9FNUzwMXexdzD4pAH0AaUAycs3BS71HLrX8jHbrI7nzq/+8O7cLAXn5Gudte+YpTV8Q==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+      react-native-windows: '*'
+    peerDependenciesMeta:
+      react-native-windows:
+        optional: true
+    dependencies:
+      invariant: 2.2.4
+      react: 18.2.0
+      react-native: 0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7)(@types/react@18.2.79)(react@18.2.0)
+    dev: false
+
   /@react-native/assets-registry@0.74.85:
     resolution: {integrity: sha512-59YmIQxfGDw4aP9S/nAM+sjSFdW8fUP6fsqczCcXgL2YVEjyER9XCaUT0J1K+PdHep8pi05KUgIKUds8P3jbmA==}
     engines: {node: '>=18'}
@@ -4407,22 +4431,6 @@ packages:
 
   /@types/prop-types@15.7.12:
     resolution: {integrity: sha512-5zvhXYtRNRluoE/jAp4GVsSduVUzNWKkOZrCDBWYtE7biZywwdC2AcEzg+cSMLFRfVgeAFqpfNabiPjxFddV1Q==}
-
-  /@types/react-native@0.73.0(@babel/core@7.24.7)(@babel/preset-env@7.24.7)(@types/react@18.2.79)(react@18.2.0):
-    resolution: {integrity: sha512-6ZRPQrYM72qYKGWidEttRe6M5DZBEV5F+MHMHqd4TTYx0tfkcdrUFGdef6CCxY0jXU7wldvd/zA/b0A/kTeJmA==}
-    deprecated: This is a stub types definition. react-native provides its own type definitions, so you do not need this installed.
-    dependencies:
-      react-native: 0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7)(@types/react@18.2.79)(react@18.2.0)
-    transitivePeerDependencies:
-      - '@babel/core'
-      - '@babel/preset-env'
-      - '@types/react'
-      - bufferutil
-      - encoding
-      - react
-      - supports-color
-      - utf-8-validate
-    dev: false
 
   /@types/react@18.2.79:
     resolution: {integrity: sha512-RwGAGXPl9kSXwdNTafkOEuFrTBD5SA2B3iEB96xi8+xu5ddUa/cpvyVCSNn+asgLCTHkb5ZxN8gbuibYJi4s1w==}
@@ -9817,6 +9825,18 @@ packages:
   /react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
 
+  /react-native-animated-pagination-dots@0.1.73(react-native-svg@15.2.0)(react-native@0.74.3)(react@18.2.0):
+    resolution: {integrity: sha512-yg6RL0ph3UN+KHX5NDa1iPVxh0J6h9dIn4zoColhJeAGV9TTl8SlaucwcBWaLd7DeUoJgkPxB/O4zJMAcpI/FQ==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+      react-native-svg: '*'
+    dependencies:
+      react: 18.2.0
+      react-native: 0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7)(@types/react@18.2.79)(react@18.2.0)
+      react-native-svg: 15.2.0(react-native@0.74.3)(react@18.2.0)
+    dev: false
+
   /react-native-css-interop@0.0.36(@babel/core@7.24.7)(react-native-reanimated@3.10.1)(react-native-safe-area-context@4.10.5)(react-native-svg@15.2.0)(react-native@0.74.3)(react@18.2.0)(tailwindcss@3.4.4):
     resolution: {integrity: sha512-ZWoKQlq6XrI5DB4BdPk5ABvJQsX7zls1SQYWuYXOQB8u5QE0KH3OfOGAGRZPekTjgkhjqGO4Bf8G2JTSWAYMSg==}
     engines: {node: '>=18'}
@@ -9849,6 +9869,16 @@ packages:
       - supports-color
     dev: false
 
+  /react-native-date-picker@5.0.4(react-native@0.74.3)(react@18.2.0):
+    resolution: {integrity: sha512-UycNfXGd4ipgdU2a+oZGj7h1nvp8Gz49f/Ko+YdWh6nrBKB49MEp0n9eF1QngbxMKqdK0AdY4udb4IdVVWji4g==}
+    peerDependencies:
+      react: '>= 17.0.1'
+      react-native: '>= 0.64.3'
+    dependencies:
+      react: 18.2.0
+      react-native: 0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7)(@types/react@18.2.79)(react@18.2.0)
+    dev: false
+
   /react-native-helmet-async@2.0.4(react@18.2.0):
     resolution: {integrity: sha512-m3CkXWss6B1dd6mCMleLpzDCJJGGaHOLQsUzZv8kAASJmMfmVT4d2fx375iXKTRWT25ThBfae3dECuX5cq/8hg==}
     peerDependencies:
@@ -9858,21 +9888,6 @@ packages:
       react: 18.2.0
       react-fast-compare: 3.2.2
       shallowequal: 1.1.0
-    dev: false
-
-  /react-native-input-spinner@1.8.1(@types/react-native@0.73.0)(@types/react@18.2.79)(react-native@0.74.3)(react@18.2.0):
-    resolution: {integrity: sha512-zgqL4HcYG5vYkpHh4ismLb7g6q/EmZjKnp4Mux0KNyvs1QpkTJ4pJGE6EgjO/JgVuIMIMbch9KLQkIYZ6BmwRQ==}
-    peerDependencies:
-      '@types/react': '*'
-      '@types/react-native': '*'
-      react: '*'
-      react-native: '*'
-    dependencies:
-      '@types/react': 18.2.79
-      '@types/react-native': 0.73.0(@babel/core@7.24.7)(@babel/preset-env@7.24.7)(@types/react@18.2.79)(react@18.2.0)
-      prop-types: 15.8.1
-      react: 18.2.0
-      react-native: 0.74.3(@babel/core@7.24.7)(@babel/preset-env@7.24.7)(@types/react@18.2.79)(react@18.2.0)
     dev: false
 
   /react-native-pager-view@6.3.0(react-native@0.74.3)(react@18.2.0):

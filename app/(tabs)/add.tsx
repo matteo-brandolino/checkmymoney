@@ -1,6 +1,5 @@
 import { Fragment, useEffect, useState } from "react";
 import { View } from "react-native";
-import InputSpinner from "react-native-input-spinner";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import AddTransactionCard from "@/components/colettyUI/tabs/add/AddTransactionCard";
@@ -9,8 +8,6 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { db } from "@/db/client";
 import { entry } from "@/db/schema";
 import { DATA_LIST_QUERY_KEY, SUMMARY_QUERY_KEY } from ".";
-import { useColorScheme } from "@/components/useColorScheme";
-import { THEME } from "@/constants/Colors";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getTemplate } from "@/lib/utils";
 import {
@@ -21,9 +18,14 @@ import {
   SelectGroup,
   SelectItem,
 } from "@/components/ui/select";
+import NumericInput from "@/components/colettyUI/tabs/add/NumericInput";
+import DateInput from "@/components/colettyUI/DateInput";
 
 const QUERY_KEY = "keys-entry";
 
+function capitalize(string: string) {
+  return string ? `${string[0].toUpperCase()}${string.substring(1)}` : string;
+}
 export default function Add() {
   const insets = useSafeAreaInsets();
 
@@ -33,7 +35,6 @@ export default function Add() {
     left: 12,
     right: 12,
   };
-  const { colorScheme } = useColorScheme();
 
   const [additionalFields, setAdditionalFields] = useState<
     { label: string; value: string; id: number }[] | null
@@ -41,9 +42,10 @@ export default function Add() {
   const [categoriesList, setCategoriesList] = useState<string[] | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("");
   const [month, setMonth] = useState<string | null>(null);
-  const [amount, setAmount] = useState<{ label: string; value: number } | null>(
-    null
-  );
+  const [amount, setAmount] = useState<{
+    label: string;
+    value: string;
+  } | null>(null);
 
   const { data } = useCustomQuery({
     queryKey: [QUERY_KEY],
@@ -66,18 +68,19 @@ export default function Add() {
     console.log("Saving: ", dataToSave);
     if (dataToSave && amount) {
       try {
-        const isExpense = amount?.value < 0;
+        const isExpense = parseFloat(amount?.value) < 0;
         await db.insert(entry).values({
           data: dataToSave,
           isExpense,
-          amount: amount.value,
+          amount: parseFloat(amount?.value),
           month: month,
+          category: selectedCategory,
         });
 
         setAdditionalFields(
           additionalFields.map((ad) => ({ ...ad, value: "" }))
         );
-        setAmount({ ...amount, value: 0 });
+        setAmount({ ...amount, value: "0" });
         setSelectedCategory("");
         return { amount, isExpense };
       } catch (error) {
@@ -93,7 +96,7 @@ export default function Add() {
   const mutation = useMutation({
     mutationFn: saveTransaction,
     onSuccess: async (data) => {
-      console.log(`New Stats ${data}`);
+      console.log(`New Stats ${JSON.stringify(data)}`);
 
       // Update the summary and data list in the query cache
       await queryClient.invalidateQueries({
@@ -112,10 +115,10 @@ export default function Add() {
         data.data.map((d) => ({ ...d, label: d.value, value: "" }))
       );
       setCategoriesList(data.categoriesList);
-      setMonth(new Date().toLocaleString("default", { month: "long" }));
+      setMonth(new Date().toISOString().split("T")[0]);
       setAmount({
         label: data.amountColumnName,
-        value: 0,
+        value: "0",
       });
     }
   }, [data]);
@@ -130,7 +133,7 @@ export default function Add() {
           additionalFields.map((ad, idx) => (
             <Fragment key={idx}>
               <Label className="my-2" nativeID="inputLabel">
-                {ad.label}
+                {capitalize(ad.label)}
               </Label>
               <Input
                 placeholder="Write some stuff..."
@@ -152,11 +155,7 @@ export default function Add() {
                 setSelectedCategory(option ? option.value : "")
               }
               value={{
-                label: selectedCategory
-                  ? `${selectedCategory[0].toUpperCase()}${selectedCategory.substring(
-                      1
-                    )}`
-                  : "Select a category",
+                label: selectedCategory ? capitalize(selectedCategory) : "",
                 value: selectedCategory,
               }}
             >
@@ -169,11 +168,7 @@ export default function Add() {
               <SelectContent insets={contentInsets} className="mt-1">
                 <SelectGroup>
                   {categoriesList.map((c, index) => (
-                    <SelectItem
-                      key={index}
-                      label={`${c[0].toUpperCase()}${c.substring(1)}`}
-                      value={c}
-                    >
+                    <SelectItem key={index} label={capitalize(c)} value={c}>
                       {c}
                     </SelectItem>
                   ))}
@@ -183,18 +178,12 @@ export default function Add() {
           </Fragment>
         )}
         {month && (
-          <Fragment>
+          <View>
             <Label className="my-2" nativeID="inputLabel">
-              Month
+              Date
             </Label>
-            <Input
-              placeholder="Write some stuff..."
-              value={month}
-              onChangeText={(value) => setMonth(value)}
-              aria-labelledbyledBy="inputLabel"
-              aria-errormessage="inputError"
-            />
-          </Fragment>
+            <DateInput date={month} setDate={setMonth} />
+          </View>
         )}
         {amount && (
           <Fragment>
@@ -202,15 +191,7 @@ export default function Add() {
               <Label className="my-2" nativeID="inputLabel">
                 {amount.label}
               </Label>
-              <InputSpinner
-                type="float"
-                min={-999999}
-                color={THEME[colorScheme].primary}
-                value={amount.value}
-                onChange={(value) =>
-                  setAmount({ label: amount.label, value: value as number })
-                }
-              />
+              <NumericInput value={amount} onChange={setAmount} />
             </View>
           </Fragment>
         )}

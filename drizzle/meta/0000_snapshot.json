@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "fa745142-c092-4173-af61-819e6425ce52",
+  "id": "19c7fb5f-5511-4c9f-b4ee-55f666287e2c",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "entry": {
@@ -24,6 +24,13 @@
         },
         "month": {
           "name": "month",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "category": {
+          "name": "category",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -61,6 +68,20 @@
         },
         "amountColumnName": {
           "name": "amountColumnName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "categoryColumnName": {
+          "name": "categoryColumnName",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "monthColumnName": {
+          "name": "monthColumnName",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

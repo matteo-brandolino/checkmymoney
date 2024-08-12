@@ -6,6 +6,7 @@ import UploadMenu from "./UploadMenu";
 
 export default function ImportFile() {
   const [excelData, setExcelData] = useState<ExcelData | null>(null);
+  const [choice, setChoice] = useState<null | number>(null);
 
   return (
     <>
@@ -15,9 +16,17 @@ export default function ImportFile() {
         }}
       />
       {excelData ? (
-        <Carousel excelData={excelData} setExcelData={setExcelData} />
+        <Carousel
+          excelData={excelData}
+          setExcelData={setExcelData}
+          choice={choice}
+        />
       ) : (
-        <UploadMenu setExcelData={setExcelData} />
+        <UploadMenu
+          setExcelData={setExcelData}
+          choice={choice}
+          setChoice={setChoice}
+        />
       )}
     </>
   );

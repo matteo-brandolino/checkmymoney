@@ -85,7 +85,7 @@ export default function Home() {
   });
 
   return (
-    <View style={{ paddingTop: insets.top * 2 }}>
+    <View className="flex-1" style={{ paddingTop: insets.top * 2 }}>
       <Summary summary={summary} />
       <TransactionsList dataList={dataList} />
     </View>

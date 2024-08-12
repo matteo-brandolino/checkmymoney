@@ -11,11 +11,15 @@ import { router } from "expo-router";
 
 type UploadFileButtonProps = {
   setExcelData: (data: ExcelData | null) => void;
+  choice: number | null;
+  setChoice: React.Dispatch<React.SetStateAction<number | null>>;
 };
 
-export default function UploadMenu({ setExcelData }: UploadFileButtonProps) {
-  const [choice, setChoice] = useState<null | number>(null);
-
+export default function UploadMenu({
+  setExcelData,
+  choice,
+  setChoice,
+}: UploadFileButtonProps) {
   const withTemplateClick = async () => {
     setChoice(0);
     const templateFound = await db.select({ value: count() }).from(template);

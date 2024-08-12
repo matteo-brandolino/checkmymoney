@@ -38,6 +38,7 @@ export type DataList = {
   data: DataSchema[] | null;
   month: string | null;
   amount: number | null;
+  category: string | null;
 };
 
 export type AddTransactionCardType<T> = {
@@ -48,7 +49,7 @@ export type AddTransactionCardType<T> = {
     | {
         amount: {
           label: string;
-          value: number;
+          value: string;
         };
         isExpense: boolean;
       }
@@ -90,6 +91,8 @@ export type DataToSave = {
 
 export type TemplateLocalState = {
   amountColumnName: string;
+  categoryColumnName: string;
+  monthColumnName: string;
   categoriesList: string[];
   data: Data[];
 };
