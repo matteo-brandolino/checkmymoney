@@ -80,11 +80,11 @@ export default function Fields({
           </View>
           <CirclePlus onPress={addCategory} color={color} size={32} />
         </View>
-        <View className="flex-row mt-2">
+        <View className="flex-row flex-wrap mt-2">
           {localState.categoriesList
             ?.filter((c) => c !== "")
             .map((c, index) => (
-              <Badge key={index} className="mr-2">
+              <Badge key={index} className="mr-2 mt-2">
                 <TouchableOpacity onPress={() => removeCategory(index)}>
                   <Text className="text-background">{c}</Text>
                 </TouchableOpacity>

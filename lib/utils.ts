@@ -28,10 +28,7 @@ export async function saveEntry({
 }) {
   if (dataToSave) {
     try {
-      //todo refactor
-      //todo add month field?
-      //todo find Amount Field with AI?
-      //todo find Month Field with AI? If it not existing, create
+      //todo refactor: change data struct of datasave
       if (!useAI) {
         const amountId = dataToSave.findIndex(
           (d) =>
@@ -165,4 +162,11 @@ export async function getTemplate(): Promise<TemplateLocalState> {
     console.error("getTemplate: ", error);
     return initialTemplate;
   }
+}
+
+export function intersect<T>(x: T[], y: T[]) {
+  const setX = new Set(x);
+  const setY = new Set(y);
+  const intersection = new Set([...setX].filter((x) => setY.has(x)));
+  return Array.from(intersection);
 }

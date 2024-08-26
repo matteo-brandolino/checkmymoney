@@ -7,6 +7,7 @@ import { SheetIcon } from "@/components/Icons";
 import { ExcelData } from "@/types";
 import { useState } from "react";
 import { useColorScheme } from "@/components/useColorScheme";
+import { getTemplate, intersect } from "@/lib/utils";
 
 type UploadFileButtonProps = {
   setExcelData: (data: ExcelData | null) => void;
@@ -44,9 +45,46 @@ export default function UploadFileButton({
         const sheetName = workbook.SheetNames[0];
         const sheet = workbook.Sheets[sheetName];
 
-        const jsonSheet = XLSX.utils.sheet_to_json(sheet);
-        //todo intersect template (ai or without) and excel json
-        setExcelData(jsonSheet as ExcelData);
+        const excelData: ExcelData = XLSX.utils.sheet_to_json(sheet);
+
+        //If AI skip this part, use helper with abstract method
+        const { amountColumnName, categoryColumnName, monthColumnName, data } =
+          await getTemplate();
+
+        console.log(`excelData ${JSON.stringify(excelData)}`);
+
+        const keysToInclude = [
+          amountColumnName,
+          categoryColumnName,
+          monthColumnName,
+          ...data.map((d) => d.value),
+        ];
+        console.log(`keysToInclude ${JSON.stringify(keysToInclude)}`);
+
+        const filteredExcelData = excelData.map((data) => {
+          const allowedKeys = intersect(
+            Object.keys(data).map((d) => d.toLowerCase().trim()),
+            keysToInclude
+          );
+          const d = Object.keys(data)
+            .filter((key) => allowedKeys.includes(key.toLowerCase().trim()))
+            .reduce(
+              (
+                obj: {
+                  [key: string]: string | number;
+                },
+                key
+              ) => {
+                obj[key] = data[key];
+                return obj;
+              },
+              {}
+            );
+          return d;
+        });
+        console.log(`filteredExcelData ${JSON.stringify(filteredExcelData)}`);
+        //todo add error if mandatory fields exists
+        setExcelData(filteredExcelData);
       }
     } catch (error) {
       console.error("Error picking document: ", error);
